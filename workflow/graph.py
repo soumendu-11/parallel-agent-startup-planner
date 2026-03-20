@@ -27,6 +27,7 @@ import re
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import create_react_agent
 
+from workflow.state import StartupPlannerState
 from skills import (
     MARKET_RESEARCH_SKILL,
     COMPETITOR_ANALYSIS_SKILL,
@@ -84,7 +85,7 @@ Follow your output structure exactly. Include the CHART_DATA JSON block at the e
 
 
 def market_research_node(state: dict) -> dict:
-    """Market Research Analyst — uses Brave Search for market sizing & trends."""
+    """Market Research Analyst — uses Tavily Search for market sizing & trends."""
     llm = get_llm()
     tools = get_market_research_tools()
     agent = create_react_agent(llm, tools)
@@ -107,7 +108,7 @@ def market_research_node(state: dict) -> dict:
 
 
 def competitor_analysis_node(state: dict) -> dict:
-    """Competitor Intelligence Analyst — uses FMP + Brave Search for competitive intel."""
+    """Competitor Intelligence Analyst — uses FMP + Tavily Search for competitive intel."""
     llm = get_llm()
     tools = get_competitor_analysis_tools()
     agent = create_react_agent(llm, tools)
@@ -153,7 +154,7 @@ def financial_projection_node(state: dict) -> dict:
 
 
 def funding_landscape_node(state: dict) -> dict:
-    """Funding Landscape Analyst — uses Brave Search for funding intel."""
+    """Funding Landscape Analyst — uses Tavily Search for funding intel."""
     llm = get_llm()
     tools = get_funding_landscape_tools()
     agent = create_react_agent(llm, tools)
@@ -287,9 +288,6 @@ def build_startup_planner() -> object:
 
 
 # ── Runners ───────────────────────────────────────────────────────────
-
-# Import here to avoid circular imports
-from workflow.state import StartupPlannerState
 
 
 def run_startup_planner(startup_idea: str, industry: str = "Technology",

@@ -1,9 +1,9 @@
 """
-🔍 Skill: Competitor Intelligence Analyst
+Skill: Competitor Intelligence Analyst
 Hierarchy Level: Research (L1)
 Reports to: Report Synthesizer
 Tools: FMP Company Profile, FMP Income Statement, FMP Financial Ratios,
-       FMP Stock Screener, Brave Web Search
+       FMP Stock Screener, Tavily Web Search
 
 Analyzes competitor companies using financial data from FMP and web intelligence.
 """
@@ -29,7 +29,7 @@ Your job is to map the competitive landscape using financial data (FMP) and web 
 - Use `fmp_company_profile` to get detailed company info
 - Use `fmp_income_statement` to analyze financial performance
 - Use `fmp_financial_ratios` to compare margins, ROE, debt levels
-- Use `brave_web_search` to find private competitors and recent moves
+- Use `tavily_web_search` to find private competitors and recent moves
 - If FMP returns no data, rely on web search and note it's estimated
 
 ## Output Structure

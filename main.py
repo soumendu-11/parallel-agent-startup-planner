@@ -2,7 +2,7 @@
 Startup Planning Pipeline — Entry Point
 
 Runs a parallel LangGraph pipeline with 4 research agents (using FMP MCP
-and Brave Search MCP tools) that fan-in to a report synthesis node.
+and Tavily Search MCP tools) that fan-in to a report synthesis node.
 
 Usage:
     python main.py
@@ -59,10 +59,10 @@ def main():
     print(f"🏢 COMPETITORS: {args.competitors}")
     print("\n" + "=" * 80)
     print("Launching parallel research agents...")
-    print("  📊 Market Research Agent     (Brave Search)")
-    print("  🔍 Competitor Analysis Agent (FMP + Brave Search)")
-    print("  💰 Financial Projection Agent (FMP)")
-    print("  🏦 Funding Landscape Agent   (Brave Search)")
+    print("  📊 Market Research Agent     (Tavily Search)")
+    print("  🔍 Competitor Analysis Agent (FMP + Tavily Search)")
+    print("  💰 Financial Projection Agent (FMP + Tavily Search)")
+    print("  🏦 Funding Landscape Agent   (Tavily Search)")
     print("=" * 80 + "\n")
 
     chart_paths = {}

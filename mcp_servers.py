@@ -1,9 +1,8 @@
 """
-MCP Server integration for FMP (Financial Modeling Prep) and Brave Search.
+MCP Server integration for FMP (Financial Modeling Prep) and Tavily Search.
 
-Uses langchain-mcp-adapters to connect to MCP servers as tool providers
-for LangGraph agent nodes. Falls back to direct HTTP if MCP servers
-are unavailable.
+Uses LangChain tool decorators to wrap FMP REST API and Tavily Search API
+for use as tools in LangGraph agent nodes.
 """
 
 import os
@@ -15,7 +14,7 @@ from langchain_core.tools import tool
 load_dotenv()
 
 FMP_BASE_URL = "https://financialmodelingprep.com/api/v3"
-BRAVE_BASE_URL = "https://api.search.brave.com/res/v1"
+TAVILY_BASE_URL = "https://api.tavily.com"
 
 
 # ── FMP MCP Tools ────────────────────────────────────────────────────
@@ -154,52 +153,65 @@ def fmp_market_index(index: str = "^GSPC") -> str:
     return json.dumps({"error": f"No index data for {index}"})
 
 
-# ── Brave Search MCP Tools ──────────────────────────────────────────
+# ── Tavily Search MCP Tools ──────────────────────────────────────────
 
 @tool
-def brave_web_search(query: str, count: int = 5) -> str:
-    """Search the web using Brave Search API. Returns titles, URLs, and descriptions.
-    Use for market research, news, competitor intelligence, and funding landscape."""
-    api_key = os.getenv("BRAVE_API_KEY")
+def tavily_web_search(query: str, max_results: int = 5) -> str:
+    """Search the web using Tavily Search API. Returns titles, URLs, and content snippets.
+    Use for market research, competitor intelligence, and funding landscape."""
+    api_key = os.getenv("TAVILY_API_KEY")
     with httpx.Client(timeout=30) as client:
-        resp = client.get(
-            f"{BRAVE_BASE_URL}/web/search",
-            headers={"X-Subscription-Token": api_key, "Accept": "application/json"},
-            params={"q": query, "count": count},
+        resp = client.post(
+            f"{TAVILY_BASE_URL}/search",
+            json={
+                "api_key": api_key,
+                "query": query,
+                "max_results": max_results,
+                "search_depth": "advanced",
+                "include_answer": True,
+            },
         )
         if resp.status_code == 200:
             data = resp.json()
             results = []
-            for r in data.get("web", {}).get("results", [])[:count]:
+            if data.get("answer"):
+                results.append({"type": "answer", "content": data["answer"]})
+            for r in data.get("results", [])[:max_results]:
                 results.append({
                     "title": r.get("title"),
                     "url": r.get("url"),
-                    "description": r.get("description", "")[:300],
+                    "content": r.get("content", "")[:400],
                 })
             return json.dumps(results, indent=2)
     return json.dumps({"error": f"Search failed for: {query}"})
 
 
 @tool
-def brave_news_search(query: str, count: int = 5) -> str:
-    """Search recent news using Brave Search. Returns latest news articles.
+def tavily_news_search(query: str, max_results: int = 5) -> str:
+    """Search recent news using Tavily Search. Returns latest news articles.
     Use for current market trends, funding announcements, industry news."""
-    api_key = os.getenv("BRAVE_API_KEY")
+    api_key = os.getenv("TAVILY_API_KEY")
     with httpx.Client(timeout=30) as client:
-        resp = client.get(
-            f"{BRAVE_BASE_URL}/news/search",
-            headers={"X-Subscription-Token": api_key, "Accept": "application/json"},
-            params={"q": query, "count": count},
+        resp = client.post(
+            f"{TAVILY_BASE_URL}/search",
+            json={
+                "api_key": api_key,
+                "query": query,
+                "max_results": max_results,
+                "search_depth": "basic",
+                "topic": "news",
+                "include_answer": False,
+            },
         )
         if resp.status_code == 200:
             data = resp.json()
             results = []
-            for r in data.get("results", [])[:count]:
+            for r in data.get("results", [])[:max_results]:
                 results.append({
                     "title": r.get("title"),
                     "url": r.get("url"),
-                    "description": r.get("description", "")[:300],
-                    "age": r.get("age"),
+                    "content": r.get("content", "")[:400],
+                    "published_date": r.get("published_date", ""),
                 })
             return json.dumps(results, indent=2)
     return json.dumps({"error": f"News search failed for: {query}"})
@@ -209,21 +221,21 @@ def brave_news_search(query: str, count: int = 5) -> str:
 
 def get_market_research_tools() -> list:
     """Tools for the Market Research node: web + news search."""
-    return [brave_web_search, brave_news_search]
+    return [tavily_web_search, tavily_news_search]
 
 
 def get_competitor_analysis_tools() -> list:
     """Tools for the Competitor Analysis node: FMP financials + web search."""
     return [fmp_company_profile, fmp_income_statement, fmp_financial_ratios,
-            fmp_stock_screener, brave_web_search]
+            fmp_stock_screener, tavily_web_search]
 
 
 def get_financial_projection_tools() -> list:
     """Tools for the Financial Projection node: FMP data + market index."""
     return [fmp_company_profile, fmp_income_statement, fmp_financial_ratios,
-            fmp_market_index, brave_web_search]
+            fmp_market_index, tavily_web_search]
 
 
 def get_funding_landscape_tools() -> list:
     """Tools for the Funding Landscape node: web + news search."""
-    return [brave_web_search, brave_news_search]
+    return [tavily_web_search, tavily_news_search]

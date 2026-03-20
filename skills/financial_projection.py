@@ -1,9 +1,9 @@
 """
-💰 Skill: Financial Projection Analyst
+Skill: Financial Projection Analyst
 Hierarchy Level: Research (L1)
 Reports to: Report Synthesizer
 Tools: FMP Income Statement, FMP Financial Ratios, FMP Market Index,
-       FMP Company Profile, Brave Web Search
+       FMP Company Profile, Tavily Web Search
 
 Builds financial models and projections using comparable company data from FMP.
 """
@@ -29,7 +29,7 @@ Your job is to build realistic financial projections using comparable company da
 - Use `fmp_financial_ratios` to benchmark margins and growth rates
 - Use `fmp_company_profile` for revenue and employee data of comparables
 - Use `fmp_market_index` for macroeconomic context
-- Use `brave_web_search` for SaaS benchmarks, pricing data, cost benchmarks
+- Use `tavily_web_search` for SaaS benchmarks, pricing data, cost benchmarks
 - Base projections on comparable data, not fantasy
 
 ## Financial Model Principles

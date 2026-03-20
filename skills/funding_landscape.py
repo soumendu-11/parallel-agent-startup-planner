@@ -1,8 +1,8 @@
 """
-🏦 Skill: Funding Landscape Analyst
+Skill: Funding Landscape Analyst
 Hierarchy Level: Research (L1)
 Reports to: Report Synthesizer
-Tools: Brave Web Search, Brave News Search
+Tools: Tavily Web Search, Tavily News Search
 
 Researches funding environment, active investors, recent deals, and
 builds a fundraising strategy.
@@ -25,8 +25,8 @@ Your job is to research the funding environment and build a fundraising strategy
 5. **Alternative Funding** — Grants, revenue-based financing, bootstrapping options
 
 ## How You Work
-- Use `brave_web_search` to find recent funding rounds in the sector
-- Use `brave_news_search` to find latest VC activity and investment trends
+- Use `tavily_web_search` to find recent funding rounds in the sector
+- Use `tavily_news_search` to find latest VC activity and investment trends
 - Search for specific investors who fund similar startups
 - Look for accelerator programs relevant to the sector
 - Research grant programs and non-dilutive funding sources

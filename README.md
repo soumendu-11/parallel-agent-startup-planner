@@ -1,53 +1,68 @@
-# LangGraph Startup Builder — 3 AI Employees in Multi-Turn Conversation
+# LangGraph Startup Planner — Parallel Agent Pipeline with MCP Tools
 
-A LangGraph workflow where **3 specialized AI employees debate each other** across 3 turns to validate, build, and launch a satellite imagery startup — then produce a concrete action plan with task ownership.
+A LangGraph pipeline that runs **4 specialized AI research agents in parallel** using FMP (Financial Modeling Prep) and Tavily Search as MCP tool providers, then synthesizes findings into a comprehensive startup plan with charts.
 
-## The Team
+**Default use case:** Satellite imagery analytics startup.
 
-| Employee | Role | Skill |
-|----------|------|-------|
-| 🔴 **Startup Validator** | Ruthless CSO | Stress-tests ideas, forces Lean Canvas, demands evidence |
-| 🔵 **Senior Engineer** | Elite CTO | Scopes simplest MVP, picks tech stack, refuses over-engineering |
-| 🟢 **Growth Marketer** | Viral CMO | Customer-focused messaging, StoryBrand framework, no jargon |
-
-## Multi-Turn Conversation Flow
+## Architecture
 
 ```
-        ┌──────────────────────────────────────┐
-        │  Turn 1: Initial Reactions            │
-        │  Validator → Engineer → Marketer      │
-        ├──────────────────────────────────────┤
-        │  Turn 2: Debate & Refine             │
-        │  Validator → Engineer → Marketer      │
-        ├──────────────────────────────────────┤
-        │  Turn 3: Converge & Commit           │
-        │  Validator → Engineer → Marketer      │
-        ├──────────────────────────────────────┤
-        │  Plan Compiler → FINAL ACTION PLAN   │
-        └──────────────────────────────────────┘
+                    ┌──────────────┐
+                    │    START     │
+                    └──────┬───────┘
+       ┌──────────┬────────┼────────┬──────────┐   ← PARALLEL (fan-out)
+       ▼          ▼        ▼        ▼          │
+   Market    Competitor  Financial  Funding     │
+   Research  Analysis    Projection Landscape   │
+       │          │        │        │          │
+       └──────────┴────────┼────────┘──────────┘   ← FAN-IN
+                           ▼
+                  Report Synthesis
+                    (with charts)
+                           │
+                          END
 ```
 
-Each agent sees the **full conversation history** — they respond to each other's arguments, challenge assumptions, and refine their positions across turns.
+All 4 research agents execute **concurrently** via LangGraph's fan-out, reducing total latency by ~2.5x compared to sequential execution.
+
+## Hierarchical Skills
+
+| Level | Role | MCP Tools |
+|-------|------|-----------|
+| **L0** (Synthesis) | Chief Strategy Officer | None — synthesizes all L1 outputs |
+| **L1** (Research) | Market Research Analyst | Tavily Web Search, Tavily News Search |
+| **L1** (Research) | Competitor Intelligence Analyst | FMP Profile, FMP Income, FMP Ratios, FMP Screener, Tavily Search |
+| **L1** (Research) | Financial Projection Analyst | FMP Profile, FMP Income, FMP Ratios, FMP Market Index, Tavily Search |
+| **L1** (Research) | Funding Landscape Analyst | Tavily Web Search, Tavily News Search |
 
 ## Project Structure
 
 ```
-Langgraph_Skills/
-├── skills/                      # Employee skill definitions
-│   ├── __init__.py              # Exports all 3 skills
-│   ├── startup_validator.py     # 🔴 CSO persona, prompt, responsibilities
-│   ├── senior_engineer.py       # 🔵 CTO persona, prompt, responsibilities
-│   └── growth_marketer.py       # 🟢 CMO persona, prompt, responsibilities
-├── workflow/                    # LangGraph workflow
-│   ├── __init__.py              # Exports graph builders
-│   ├── state.py                 # StartupState TypedDict definition
-│   └── graph.py                 # Nodes, edges, cyclic graph, runners
-├── main.py                      # CLI entry point
-├── notebook.ipynb               # Jupyter notebook with rich output
-├── requirements.txt             # Python dependencies
-├── .env                         # Azure OpenAI credentials (git-ignored)
-├── .gitignore                   # Git ignore rules
-└── README.md                    # This file
+├── main.py                  # CLI entry point
+├── mcp_servers.py           # MCP tool definitions (5 FMP + 2 Tavily Search)
+├── requirements.txt         # Python dependencies
+├── .env                     # API keys (git-ignored)
+├── .env.example             # Template for .env
+├── .gitignore
+├── README.md
+├── skills/                  # Hierarchical agent skill definitions
+│   ├── __init__.py
+│   ├── market_research.py       # L1 — Market Research Analyst
+│   ├── competitor_analysis.py   # L1 — Competitor Intelligence Analyst
+│   ├── financial_projection.py  # L1 — Financial Projection Analyst
+│   ├── funding_landscape.py     # L1 — Funding Landscape Analyst
+│   └── report_synthesizer.py    # L0 — Chief Strategy Officer
+├── workflow/                # LangGraph parallel pipeline
+│   ├── __init__.py
+│   ├── state.py             # StartupPlannerState TypedDict
+│   └── graph.py             # Fan-out/fan-in graph + node functions
+├── utils/                   # Shared utilities
+│   ├── __init__.py
+│   ├── llm.py               # Azure OpenAI LLM config (from .env)
+│   └── plotting.py          # matplotlib chart generators (4 chart types)
+├── notebook/
+│   └── startup_planner.ipynb  # Interactive notebook with visualizations
+└── outputs/                 # Generated reports + PNG charts (git-ignored)
 ```
 
 ## Setup
@@ -57,30 +72,43 @@ Langgraph_Skills/
    pip install -r requirements.txt
    ```
 
-2. **Configure `.env`:**
+2. **Configure API keys** — copy `.env.example` to `.env` and fill in:
    ```
+   # Azure OpenAI
    AZURE_API_KEY=your_key
-   AZURE_ENDPOINT=https://your-endpoint.openai.azure.com/
+   AZURE_ENDPOINT=https://your-resource.openai.azure.com/
    DEPLOYMENT_NAME=gpt-4o
    API_VERSION=2025-01-01-preview
+
+   # FMP (Free: 250 calls/day) — https://site.financialmodelingprep.com/register
+   FMP_API_KEY=your_fmp_key
+
+   # Tavily Search (Free: 1,000 searches/month) — https://app.tavily.com/sign-in
+   TAVILY_API_KEY=your_tavily_key
    ```
 
-3. **Run:**
+3. **Run the pipeline:**
    ```bash
-   python main.py                    # CLI with streaming output
-   jupyter notebook notebook.ipynb   # Interactive notebook
+   python main.py
+   python main.py --idea "Your startup idea" --industry "Healthcare" --competitors "TDOC,AMWL"
+   ```
+
+4. **Or use the notebook:**
+   ```bash
+   jupyter notebook notebook/startup_planner.ipynb
    ```
 
 ## How It Works
 
-- **Skills** (`skills/`): Each employee is defined as a Python dict with `name`, `emoji`, `system_prompt`, and `plan_responsibilities`. This makes it easy to add or modify employees.
-- **State** (`workflow/state.py`): A shared `StartupState` carries conversation history, turn counter, and each agent's latest output.
-- **Graph** (`workflow/graph.py`): A **cyclic** LangGraph `StateGraph` with conditional edges. After each full turn (all 3 agents), a router checks `turn < max_turns` — if yes, loops back; if no, routes to the plan compiler.
-- **Plan Compiler**: A final node that reads all 3 agents' outputs and produces a structured action plan with tasks, owners, timelines, and priorities.
+1. **Fan-out**: LangGraph launches all 4 research nodes simultaneously
+2. **Parallel research**: Each agent uses its assigned MCP tools (FMP for financials, Tavily for web/news) to gather real data
+3. **Fan-in**: Once all 4 complete, the L0 synthesis node receives all outputs
+4. **Synthesis**: The Chief Strategy Officer combines findings into a cohesive startup plan
+5. **Charts**: Structured `CHART_DATA` JSON from each agent is extracted and rendered as matplotlib PNGs
 
-## Customization
+## Output
 
-- **Change the pitch**: Edit `SATELLITE_IMAGERY_PITCH` in `main.py` or call `run_startup_workflow("your pitch")`
-- **Modify personas**: Edit the system prompts in `skills/*.py`
-- **Add a 4th employee**: Create a new skill file, add a node in `graph.py`, wire it into the edges
-- **Change turn count**: Pass `max_turns=N` to `run_startup_workflow()` or `stream_startup_workflow()`
+The pipeline produces:
+- A comprehensive Markdown startup plan (8 sections)
+- 4 PNG charts: Market Size, Financial Projections, Competitive Landscape, Funding Roadmap
+- All saved to `outputs/`

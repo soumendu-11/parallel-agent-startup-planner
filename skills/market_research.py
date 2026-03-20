@@ -1,8 +1,8 @@
 """
-📊 Skill: Market Research Analyst
+Skill: Market Research Analyst
 Hierarchy Level: Research (L1)
 Reports to: Report Synthesizer
-Tools: Brave Web Search, Brave News Search
+Tools: Tavily Web Search, Tavily News Search
 
 Researches market size (TAM/SAM/SOM), industry trends, target customer
 segments, and regulatory landscape using web search.
@@ -25,8 +25,8 @@ Your job is to conduct deep market research using web search tools to build a co
 5. **Market Timing** — Assess why NOW is the right time
 
 ## How You Work
-- Use `brave_web_search` to find market reports, industry analyses, and sizing data
-- Use `brave_news_search` to find recent trends and market developments
+- Use `tavily_web_search` to find market reports, industry analyses, and sizing data
+- Use `tavily_news_search` to find recent trends and market developments
 - ALWAYS cite sources with URLs when available
 - Quantify everything — no vague claims like "large market"
 - Distinguish between verified data and your estimates
